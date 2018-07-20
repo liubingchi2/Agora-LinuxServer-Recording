@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
-
+#include <map>
 namespace agora {
 namespace base {
 struct ipv4 {
@@ -45,9 +45,14 @@ class opt_parser {
     };
     const char *help;
     opt_type optType;
+    int seq;
+  };
+  struct ex_internal_opt{
+    internal_opt stru_opt;
+    const char* long_opt;
   };
  public:
-  opt_parser() {}
+  opt_parser();
 
   // bool add_short_arg(bool *store, char short_arg);
   // bool add_short_arg(int *store, char short_arg);
@@ -74,9 +79,8 @@ class opt_parser {
 
   // NOTE(liuyong): the FIRST argument must be supplied as a place holder
   bool parse_opts(int argc, char *const argv[]);
-
   void clear();
-
+  void save_to_exopts()const;
   void print_usage(const char *exec_file, std::ostream &sout) const;
  private:
   // bool insert_short_arg(internal_opt arg, char short_arg);
@@ -90,6 +94,8 @@ class opt_parser {
  private:
   // std::unordered_map<char, internal_opt> short_args_;
   std::unordered_map<const char *, internal_opt> long_opts_;
+  mutable std::map<int, ex_internal_opt> ex_long_opts_;
+  int sequence_;
 };
 
 }

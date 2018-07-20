@@ -1,145 +1,152 @@
-#pragma once
+#ifndef _IAGORA_RECORDINGENGINE_H_
+#define _IAGORA_RECORDINGENGINE_H_
+#include "IAgoraLinuxSdkCommon.h"
 
 namespace agora {
 namespace recording {
 
-typedef unsigned char uchar_t;
-typedef unsigned int uint_t;
-typedef unsigned int uid_t;
-
-enum ERROR_CODE_TYPE {
-    ERR_OK = 0,
-    //1~1000
-    ERR_FAILED = 1,
-    ERR_INVALID_ARGUMENT = 2,
-    ERR_INTERNAL_FAILED = 3,
-};
-
-enum WARN_CODE_TYPE {
-    WARN_NO_AVAILABLE_CHANNEL = 103,
-    WARN_LOOKUP_CHANNEL_TIMEOUT = 104,
-    WARN_LOOKUP_CHANNEL_REJECTED = 105,
-    WARN_OPEN_CHANNEL_TIMEOUT = 106,
-    WARN_OPEN_CHANNEL_REJECTED = 107,
-};
-
-enum CHANNEL_PROFILE_TYPE
-{
-    CHANNEL_PROFILE_COMMUNICATION = 0,
-    CHANNEL_PROFILE_LIVE_BROADCASTING = 1,
-};
-
-enum USER_OFFLINE_REASON_TYPE
-{
-    USER_OFFLINE_QUIT = 0,
-    USER_OFFLINE_DROPPED = 1,
-    USER_OFFLINE_BECOME_AUDIENCE = 2,
-};
-
-enum REMOTE_VIDEO_STREAM_TYPE
-{
-    REMOTE_VIDEO_STREAM_HIGH = 0,
-    REMOTE_VIDEO_STREAM_LOW = 1,
-};
-
-
-typedef struct VideoMixingLayout
-{
-    struct Region {
-        uid_t uid;
-        double x;//[0,1]
-        double y;//[0,1]
-        double width;//[0,1]
-        double height;//[0,1]
-        int zOrder; //optional, [0, 100] //0 (default): bottom most, 100: top most
-
-        //  Optional
-        //  [0, 1.0] where 0 denotes throughly transparent, 1.0 opaque
-        double alpha;
-
-        int renderMode;//RENDER_MODE_HIDDEN: Crop, RENDER_MODE_FIT: Zoom to fit
-        Region()
-        :uid(0)
-        , x(0)
-        , y(0)
-        , width(0)
-        , height(0)
-        , zOrder(0)
-        , alpha(1.0)
-        , renderMode(1)
-        {}
-
-    };
-    int canvasWidth;
-    int canvasHeight;
-    const char* backgroundColor;//e.g. "#C0C0C0" in RGB
-    int regionCount;
-    const Region* regions;
-    const char* appData;
-    int appDataLength;
-    VideoMixingLayout()
-    :canvasWidth(0)
-    , canvasHeight(0)
-    , backgroundColor(NULL)
-    , regionCount(0)
-    , regions(NULL)
-    , appData(NULL)
-    , appDataLength(0)
-    {}
-} VideoMixingLayout;
-
-typedef struct UserJoinInfos {
-    const char* recordingDir;
-    //new attached info add below
-
-    UserJoinInfos():
-    recordingDir(NULL)
-    {}
-}UserJoinInfos;
-
-
 class IRecordingEngineEventHandler {
+
 public:
     virtual ~IRecordingEngineEventHandler() {}
+    
+    /**
+     *  Callback when an error occurred during the runtime of recording engine
+     *
+     *
+     *  @param error        Error code
+     *  @param stat_code    state code
+     *
+     */
+    virtual void onError(int error, agora::linuxsdk::STAT_CODE_TYPE stat_code) = 0;
 
-    virtual void onError(int error) = 0;
+    /**
+     *  Callback when an warning occurred during the runtime of recording engine
+     *
+     *
+     *  @param warn         warning code
+     *
+     */
     virtual void onWarning(int warn) = 0;
-
+   
+    /**
+     *  Callback when the user hase successfully joined the specified channel
+     *
+     *
+     *  @param channelID    channel ID 
+     *  @param uid          User ID
+     *
+     */
     virtual void onJoinChannelSuccess(const char * channelId, uid_t uid) = 0;
-    virtual void onLeaveChannel() = 0;
+   
+    /**
+     *  Callback when recording application successfully left the channel
+     *
+     *
+     *  @param code        leave path code
+     *
+     */
+    virtual void onLeaveChannel(agora::linuxsdk::LEAVE_PATH_CODE code) = 0;
 
-    virtual void onUserJoined(uid_t uid, UserJoinInfos &infos) = 0;
-    virtual void onUserOffline(uid_t uid, USER_OFFLINE_REASON_TYPE reason) = 0;
+    /**
+     *  Callback when another user successfully joined the channel
+     *
+     *
+     *  @param uid          user ID
+     *  @param infos        user join information    
+     *
+     */
+    virtual void onUserJoined(uid_t uid, agora::linuxsdk::UserJoinInfos &infos) = 0;
+   
+    /**
+     *  Callback when a user left the channel or gone offline
+     *
+     *
+     *  @param uid          user ID
+     *  @param reason       offline reason    
+     *
+     */
+    virtual void onUserOffline(uid_t uid, agora::linuxsdk::USER_OFFLINE_REASON_TYPE reason) = 0;
+
+    /**
+     *  Callback when received a audio frame
+     *
+     *
+     *  @param uid          user ID
+     *  @param frame        pointer to received audio frame    
+     *
+     */
+    virtual void audioFrameReceived(unsigned int uid, const agora::linuxsdk::AudioFrame *frame) const = 0;
+
+    /**
+     *  Callback when received a video frame
+     *
+     *
+     *  @param uid          user ID
+     *  @param frame        pointer to received video frame    
+     *
+     */
+    virtual void videoFrameReceived(unsigned int uid, const agora::linuxsdk::VideoFrame *frame) const = 0;
 };
 
+ 
+
 typedef struct RecordingConfig {
-    CHANNEL_PROFILE_TYPE channelProfile;
     bool isAudioOnly;
+    bool isVideoOnly;
     bool isMixingEnabled;
+    bool mixedVideoAudio;
+    char * mixResolution;
     char * decryptionMode;
     char * secret;
-    int idleLimitSec;
     char * appliteDir;
-//    char * appliteLogDir;
     char * recordFileRootDir;
+    char * cfgFilePath;
+    agora::linuxsdk::VIDEO_FORMAT_TYPE decodeVideo;
+    agora::linuxsdk::AUDIO_FORMAT_TYPE decodeAudio; 
     int lowUdpPort;
-    int highUdpPort;
+    int highUdpPort;  
+    int idleLimitSec;
+    int captureInterval;
+    agora::linuxsdk::CHANNEL_PROFILE_TYPE channelProfile;
+    agora::linuxsdk::REMOTE_VIDEO_STREAM_TYPE streamType;
+    agora::linuxsdk::TRIGGER_MODE_TYPE triggerMode;
+    agora::linuxsdk::LANGUAGE_TYPE lang;
+    char * proxyServer;
 
-    RecordingConfig(): channelProfile(CHANNEL_PROFILE_COMMUNICATION),
+    RecordingConfig(): channelProfile(agora::linuxsdk::CHANNEL_PROFILE_COMMUNICATION),
         isAudioOnly(false),
+        isVideoOnly(false),
         isMixingEnabled(false),
+        mixResolution(NULL),
         decryptionMode(NULL),
         secret(NULL),
         idleLimitSec(300),
         appliteDir(NULL),
-//        appliteLogDir(NULL),
         recordFileRootDir(NULL),
+        cfgFilePath(NULL),
         lowUdpPort(0),
-        highUdpPort(0)
+        highUdpPort(0),
+        captureInterval(5),
+        decodeAudio(agora::linuxsdk::AUDIO_FORMAT_DEFAULT_TYPE),
+        decodeVideo(agora::linuxsdk::VIDEO_FORMAT_DEFAULT_TYPE),
+        mixedVideoAudio(false),
+        streamType(agora::linuxsdk::REMOTE_VIDEO_STREAM_HIGH),
+        triggerMode(agora::linuxsdk::AUTOMATICALLY_MODE),
+        lang(agora::linuxsdk::CPP_LANG),
+        proxyServer(NULL)
     {}
+
+    virtual ~RecordingConfig() {}
 } RecordingConfig;
 
-class IRecordingEngine{
+typedef struct RecordingEngineProperties {
+    char* storageDir;
+    RecordingEngineProperties(): storageDir(NULL)
+                          {}
+}RecordingEngineProperties;
+
+class IRecordingEngine {
 public:
 
     /**
@@ -166,8 +173,6 @@ public:
      */
     virtual int joinChannel(const char * channelKey, const char *channelId, uid_t uid, const RecordingConfig &config) = 0;
 
-
-
     /**
      *  set the layout of video mixing
      *
@@ -175,7 +180,7 @@ public:
      *
      *  @return 0: Method call succeeded. <0: Method call failed.
      */
-    virtual int setVideoMixingLayout(const VideoMixingLayout &layout) = 0;
+    virtual int setVideoMixingLayout(const agora::linuxsdk::VideoMixingLayout &layout) = 0;
 
     /**
      *  Stop recording
@@ -190,7 +195,28 @@ public:
      *  @return 0: Method call succeeded. <0: Method call failed.
      */
     virtual int release() = 0;
+
+    /**
+     * Get recording properties
+     */
+    virtual const RecordingEngineProperties* getProperties() = 0;
+
+    /**
+     *  start service under manually trigger mode
+     *
+     *  @return 0: Method call succeeded. <0: Method call failed.
+     */
+    virtual int startService() = 0;
+
+    /**
+     *  start service under manually trigger mode
+     *
+     *  @return 0: Method call succeeded. <0: Method call failed.
+     */
+    virtual int stopService() = 0;
 };
 
 }
 }
+
+#endif
