@@ -6,7 +6,7 @@ This sample application for the Agora Recording SDK enables recording on your Li
 
 The Agora Recording SDK for Linux is integrated on your Linux server instead of your app:
 
- <div><img src="recording_linux_en.png" height="60%" width="60%"></div>
+ <div><img src="./readme_pics/recording_linux_en.png" height="60%" width="60%"></div>
 
 To record the content of a channel, a ‘special audience’ joins the channel, gets the content and stores the content on a Linux server. You must:
 
@@ -124,7 +124,7 @@ The recording SDK is compatible with the following Agora SDKs:
 1.  Get the channel name and App ID of the communication that you want to record.
 2.  [Download](https://docs.agora.io/en/2.3.1/download)
  
- <div><img src="linux_structure.png" height="50%" width="50%"></div>
+ <div><img src="./readme_pics/linux_structure.png" height="50%" width="50%"></div>
  
   <table>
     <tbody>
