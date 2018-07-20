@@ -12,7 +12,8 @@
 #include "base/atomic.h"
 #include "base/log.h" 
 #include "base/opt_parser.h" 
-#include "agorasdk/AgoraSdk.h" 
+#include "agorasdk/AgoraSdk.h"
+
 using std::string;
 using std::cout;
 using std::cerr;
@@ -52,12 +53,12 @@ int main(int argc, char * const argv[]) {
 
   string decryptionMode;
   string secret;
+
   string mixResolution("360,640,15,500");
 
   int idleLimitSec=5*60;//300s
 
   string applitePath;
-  string appliteLogPath;
   string recordFileRootDir = "";
   string cfgFilePath = "";
   string proxyServer;
