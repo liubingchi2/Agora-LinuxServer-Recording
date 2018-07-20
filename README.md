@@ -51,6 +51,7 @@ You must meet the following hardware and network prerequisites:
     <td>DNS</td>
     <td>The Linux server needs Internet access</td>
   </tr>
+ </table>
 
 Agora recommends the following hardware configurattions:
 
