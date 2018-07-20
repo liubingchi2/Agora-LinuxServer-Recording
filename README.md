@@ -11,13 +11,13 @@ The Agora Recording SDK for Linux is integrated on your Linux server instead of 
 To record the content of a channel, a ‘special audience’ joins the channel, gets the content and stores the content on a Linux server. You must:
 
 -   Implement the recording SDK on your Linux server;
--   Use the same App ID in the recording SDK and in other Agora SDKs implementing voice or video communication.
+-   Use the same App ID in the recording SDK and in other Agora SDKs implementing voice or video communication;
 -   Specify the channel to record.
 
 ## Prerequisites
-### Hardware and Network prerequisites
+### Hardware prerequisites
 
-You must meet the following hardware and network prerequisites:
+You must meet the following hardware prerequisites:
 
 <table>
   <tr>
@@ -26,13 +26,12 @@ You must meet the following hardware and network prerequisites:
   </tr>
   <tr>
     <td>Server</td>
-    <td>Physical or virtual:
-      <ul>
-        <li>Ubuntu Linux 14.04+ LTS 64-bit;</li>
-        <li>CentOS 7+ x64</li>
-      </ul>
-    </td>
+    <td>Physical or virtual</td>
   </tr>
+  <tr>
+  	<td>System</td>
+  	<td>Ubuntu Linux 14.04+ LTS 64-bit or CentOS 7+ x64</td>
+   </tr>
   <tr>
     <td>Network</td>
     <td>The Linux server needs Internet access</td>
@@ -63,23 +62,13 @@ Agora recommends the following hardware configurattions:
   </tr>
   <tr>
     <td>SUPERMICRO SYS-6017R-TDF</td>
-    <td>1U rack-mounted SYS-6017R-TDF</td>
+    <td>1U rack-mounted SYS-6017R-TDF (Intel® Xeon® E5-2600 Series Processor)</td>
     <td>1</td>
-  </tr>
-  <tr>
-    <td></td>
-    <td>Intel® Xeon® E5-2600 Series Processor</td>
-    <td></td>
   </tr>
   <tr>
     <td>Case</td>
-    <td>1U Rackmountable</td>
+    <td>1U Rackmountable (440-W high-efficiency redundant power supply w/ PMBus)</td>
     <td>1</td>
-  </tr>
-  <tr>
-    <td></td>
-    <td>(440-W high-efficiency redundant power supply w/ PMBus)</td>
-    <td></td>
   </tr>
   <tr>
     <td>Processor</td>
@@ -123,7 +112,7 @@ The recording SDK is compatible with the following Agora SDKs:
 
 ### Step 1: Setting up the environment
 1.  Get the channel name and App ID of the communication that you want to record.
-2.  [Download](https://docs.agora.io/en/2.3.1/download)
+2.  Download [Agora recording SDK along with sample code](https://docs.agora.io/en/2.3.1/download).
  
  <div><img src="./readme_pics/linux_structure.png" height="50%" width="50%"></div>
  
@@ -199,7 +188,7 @@ The recording SDK is compatible with the following Agora SDKs:
 
 ### Step 2: Compiling the Sample Code
 
-To compile the sample code under the *samples/cpp* directory, run the following command:
+To compile the sample code, under the *samples/cpp* directory, run the following command:
 
 ```
 make
@@ -231,8 +220,6 @@ The command specifies the following information:
 -   –appliteDir ../../bin specifies the directory of AgoraCoreService.
 
 After you start recording, you can find folders with a name convention of *date\_timestamp* under the directory of *samples/cpp*.
-
-You can also develop C++ programs to implement recording apart from using command line.
 
 For the detailed API reference, see [Recording API](https://docs.agora.io/en/2.3.1/addons/Recording/API%20Reference/recording_cpp). You can also run *./record\_local* command for details.
 
@@ -725,9 +712,9 @@ Once the signal stops, leave the channel using `recorder.leaveChannel()` and rel
 ```
 
 ## Resources
-- See full API documentation in the [Document Center](https://docs.agora.io/en/)
-- [File bugs about this sample](https://dashboard.agora.io)
-- See [detailed Agora Linux Recording guides](https://docs.agora.io/en/2.3.1/addons/Recording/Quickstart%20Guide/recording_cpp?platform=C%2B%2B)
+- See full API documentation in the [Document Center](https://docs.agora.io/en/);
+- [File bugs about this sample](https://dashboard.agora.io);
+- See [detailed Agora Linux Recording guides](https://docs.agora.io/en/2.3.1/addons/Recording/Quickstart%20Guide/recording_cpp?platform=C%2B%2B).
 
 ## License
 This software is licensed under the MIT License (MIT). [View the license](LICENSE.md).
