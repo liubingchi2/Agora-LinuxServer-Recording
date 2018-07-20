@@ -2,110 +2,251 @@
 
 This sample application for the Agora Recording SDK enables recording on your Linux server.
 
+## Introduction
+
+The Agora Recording SDK for Linux is integrated on your Linux server instead of your app:
+
+ <div><img src="recording_linux_en.png" height="60%" width="60%"></div>
+
+To record the content of a channel, a ‘special audience’ joins the channel, gets the content and stores the content on a Linux server. You must:
+
+-   Implement the recording SDK on your Linux server;
+-   Use the same App ID in the recording SDK and in other Agora SDKs implementing voice or video communication.
+-   Specify the channel to record.
+
 ## Prerequisites
-- Ubuntu 12.04+ x64 or CentOS 6.5+ x64 (CentOS 7+ recommended)
-- GCC 4.4+
-- ARS IP (public IP)
-- 1MB+ bandwidth for each simultaneous recording channel
-- Server access for `qos.agoralab.co` 
+### Hardware and Network prerequisites
 
-	**Note:** If server access is denied, the Agora SDK may fail to transfer the required data.
+You must meet the following hardware and network prerequisites:
 
-## Quick Start
+<table>
+  <tr>
+    <th>Hardware</th>
+    <th>Requirements</th>
+  </tr>
+  <tr>
+    <td>Server</td>
+    <td>Physical or virtual:
+      <ul>
+        <li>Ubuntu Linux 14.04+ LTS 64-bit;</li>
+        <li>CentOS 7+ x64</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>Network</td>
+    <td>The Linux server needs Internet access</td>
+  </tr>
+  <tr>
+    <td>Internet Bandwidth</td>
+    <td>Decide the Internet bandwidth based on the number of channels being recorded simultaneously. Refer to the following data: 
+      <ul>
+        <li>When the resolution of the recorded scene is 640*360, the bandwidth is 500kbps;</li>
+        <li>To record a channel with two users, you need a bandwidth of 1 Mbps;</li>
+        <li>For 100 channels, you need a bandwidth of 100Mbps.</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>DNS</td>
+    <td>The Linux server needs Internet access</td>
+  </tr>
 
-This section shows you how to prepare and build the sample application.
+Agora recommends the following hardware configurattions:
 
-- [Create an Account and Obtain an App ID](#create-an-account-and-obtain-an-app-id)
-- [Integrate the Agora Video SDK](#integrate-the-agora-video-sdk)
-- [Build the Sample Application](#build-the-sample-application) 
+<table>
+  <tr>
+    <th>Product</th>
+    <th>Description</th>
+    <th>Number</th>
+  </tr>
+  <tr>
+    <td>SUPERMICRO SYS-6017R-TDF</td>
+    <td>1U rack-mounted SYS-6017R-TDF</td>
+    <td>1</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>Intel® Xeon® E5-2600 Series Processor</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Case</td>
+    <td>1U Rackmountable</td>
+    <td>1</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>(440-W high-efficiency redundant power supply w/ PMBus)</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Processor</td>
+    <td>Intel Xeon E5-2620V2 2.1 G, L3:15M, 6C (P4X-DPE52620V2-SR1AN)</td>
+    <td>2</td>
+  </tr>
+  <tr>
+    <td>Memory</td>
+    <td>MEM-DR380L-HL06-ER16 (8-GB DDR3-1600 2Rx8 1.35-V ECC REG RoHS)</td>
+    <td>1</td>
+  </tr>
+  <tr>
+    <td>Hard Disk</td>
+    <td>250-G 3.5 SATA Enterprise (HDD-T0250-WD2503ABYZ)</td>
+    <td>2</td>
+  </tr>
+</table>
 
+Assuming two users are in a channel in a video call \(communication mode\), with the resolution of 640\*360, frame rate of 15 fps and bitrate of one video stream of 500kbps:
 
-### Create an Account and Obtain an App ID
-To build and run the sample application, first obtain an app ID: 
+The CPU is fully loaded and 100 channels are recorded simultaneously:
 
-1. Create a developer account at [agora.io](https://dashboard.agora.io/signin/). Once you finish the sign-up process, you are redirected to the dashboard.
-2. In the dashboard tree on the left, navigate to **Projects** > **Project List**.
-3. Save the app ID from the Agora dashboard. The app ID is needed to run the sample application.
+  -   Each channel writes to the disk at a speed of 60 kB/s. The total write-in speed is 6.0 MB/s, which is much lower than the maximum write-in speed of the disk;
+  -   Each channel uses 25 MB of memory. Thus, 2.5 GB of memory, which is 31% of the total memory, is taken;
+  -   The downstream Internet flow for each channel is 500 kbps \* 2 = 1 Mbps. The total downstream flow is 100 Mbps. The upstream flow is neglected.
 
-### Integrate the Agora Video SDK
+### Compatibility with the Agora SDKs
 
-To open and build the sample application, first integrate the Agora SDK. 
+The recording SDK supports:
 
-1. Download the [Agora Recording SDK for Linux](https://www.agora.io/en/download/).
-2. Unzip the downloaded SDK package.
-3. Copy the following files/folders from the downloaded SDK package to the sample application:
+  -   recording the communication that uses the native SDK;
+  -   recording the communication that uses the web SDK;
+  -   recording the communication that uses both the native SDK and the web SDK;
 
-	SDK Path|Sample Application Path
-	----|----
-	`bin/AgoraCoreService` file|Copy to`bin` folder
-	`libs/librecorder.a` file|Copy to `libs` folder
-	`samples/agorasdk` folder|Copy to `samples` folder
-	`samples/cpp` folder|Copy to `samples` folder
-	`samples/java` folder| Copy to `samples` folder
+The recording SDK is compatible with the following Agora SDKs:
 
-4. Replace the following folders in the sample application with the folders from the downloaded SDK package.
+  -   Agora Native SDK v1.7.0+ for all platforms. If any user in the channel uses Agora SDK v1.6, the whole channel cannot record anything;
+  -   Agora Web SDK v1.12.0+ .
 
-	- `include` folder
-	- `tools` folder
-	- `base` folder
+## Steps to Run the Sample 
 
-5. To add the required `libRecordEngine.a` file, decompress the `libRecordEngine.tar.gz` file in the `libs` directory of your sample application. 
+### Step 1: Setting up the environment
+1.  Get the channel name and App ID of the communication that you want to record.
+2.  [Download](https://docs.agora.io/en/2.3.1/download)
+ 
+ <div><img src="linux_structure.png" height="50%" width="50%"></div>
+ 
+  <table>
+    <tbody>
+      <tr>
+        <td><strong>Folder</strong></td>
+        <td><strong>Description</strong></td>
+      </tr>
+      <tr>
+        <td>bin</td>
+        <td>The directory where AgoraCoreService is located</td>
+      </tr>
+      <tr>
+        <td>include</td>
+        <td>
+          <ul class="first last simple">
+            <li>base: Required header files for developing the recording application</li>
+            <li>IAgoraLinuxSdkCommon.h: Public structure and enumeration</li>
+            <li>IAgoraRecordingEngine.h: Interface of the recording engine and its config information</li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <td>libs</td>
+        <td>Required libraries for developing the recording application</td>
+      </tr>
+      <tr>
+        <td>samples</td>
+        <td>Sample code
+          <ul class="last simple">
+            <li>agorasdk: Demo that implements the C++ interface and callbacks</li>
+            <li>base: Public sample code</li>
+            <li>cpp: C++ sample code
+              <ul>
+                <li>release/bin/recorder: Parent process that can be run</li>
+              </ul>
+            </li>
+            <li>java: Java sample code
+              <ul>
+                <li>native: Native code</li>
+                <li>native/jni: JNI delegate</li>
+                <li>src: java code</li>
+                <li>src/io/agora/recording/RecordingEventHandler.java: Callback interface class</li>
+                <li>src/io/agora/recording/RecordingSDK.java: Recording interface class</li>
+              </ul>
+            </li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <td>Tools</td>
+        <td>Transcoding tools</td>
+      </tr>
+    </tbody>
+  </table>
 
+3.  Open the TCP ports 1080 and 8000.
+4.  Open the UDP ports:
 
-### Build the Sample Application 
+    -   Duplex ports: 1080, 4000-4030, 8000, 9700 and 25000;
+    -   Simplex downstream ports used by the recording processes.
 
-1. Ensure the following UDP ports are open. (Required for communication with the Agora servers.)
-	- 4001
-	- 4030
-	- 1080
-	- 8000
-	- 25000
-2. Ensure local ports are not limited by firewalls. If limitations cannot be avoided, apply the following port settings:
+    **Note:** 
 
-	Port type|Setting
-	----|----
-	Receiving port|4000 - 41000
-	Low UDP Port|40000
-	High UDP Port|41000
+      -   Use the command line *iptables -L* to check the UDP port.
+      -   To record the content in channels, you need one recording process for each of the channels. One recording process requires four simplex downstream ports. There must be no port conflict among the processes, including the system processes and all the recording processes.
+          -   Agora recommends that you specify the range of ports used by the recording processes. Configure a large range for all recording processes \(Agora recommends 40000 ~ 41000 or larger\). If so, the Recording SDK assigns ports to each recording process within the specified range and avoids port conflicts automatically. To set the port range, you need to configure the parameters *lowUdpPort* and *highUdpPort*;
+          -   If the parameters, *lowUdpPort* and *highUdpPort*, are not specified, the ports used by the recording processes are at random, which may cause port conflicts.
 
-3. Navigate to the `samples/cpp` directory. Replace `PATH-TO-PROJECT` with the path to the sample application on your Linux server.
+5.  Set whitelist domains: *.agora.io*, *vocs.agora.io*, *qoslbs.agora.io*, and *qos.agora.io* .
+6.  Ensure that your compiler is gcc 4.4+.
 
-	```
-	cd PATH-TO-PROJECT/samples/cpp
-	```
-	
-4. Execute the `make` command to create a `record_local` application within the directory.
+### Step 2: Compiling the Sample Code
 
-	```
-	make
-	```
-
-5. Run `./record_local`, using the app ID and path to the sample app directory.
-	- Replace `APPID` with the app ID from the [earlier step](#create-an-account-and-obtain-an-app-id).
-	- Replace `PATH-TO-PROJECT` with the path to the sample app directory on the Linux server.
-
-	```
-	./recorder_local --appId APPID --uid 0 --channel mychannel --appliteDir PATH-TO-PROJECT/bin/AgoraCoreService
-	```
-
-**Note:** To view additional Agora SDK help commands, run `cmds`.
+To compile the sample code under the *samples/cpp* directory, run the following command:
 
 ```
-cmds ./Record_local
-```	
+make
+```
+
+After the compilation, a *record\_local* application is generated in the directory.
+
+### Step 3: Starting Recording
+
+Start recording.
+
+Under the *samples/cpp* directory, run the following command:
+
+```
+./recorder_local --appId APP_ID --uid 0 --channel Channel_Name --appliteDir ../../bin
+```
+
+**Note:** 
+
+-   Replace *APP\_ID* with the App ID used in communication;
+-   Replace *Channel\_Name* with the channel name of the channel to record.
+
+
+The command specifies the following information:
+
+-   –appId APP\_ID specifies the App ID used in communication to record;
+-   –uid 0 allows the SDK to automatically assign a uid for recording;
+-   –channel Channel\_Name specifies the name of the channel to record;
+-   –appliteDir ../../bin specifies the directory of AgoraCoreService.
+
+After you start recording, you can find folders with a name convention of *date\_timestamp* under the directory of *samples/cpp*.
+
+You can also develop C++ programs to implement recording apart from using command line.
+
+For the detailed API reference, see [Recording API](https://docs.agora.io/en/2.3.1/addons/Recording/API%20Reference/recording_cpp). You can also run *./record\_local* command for details.
 
 ## Steps to Create the Sample
 
 The key code for the sample application is in the `main.cpp` file. The most relevant code for the Agora Recording SDK is in the following sections:
 
-- [Add Import Statements](#add-import-statements)
-- [Add Global Variables](#add-global-variables)
-- [Start and Stop Service Methods](#start-and-stop-service-methods)
+- [Import C++ Libraries](#import_c++_libraries)
+- [Add Namespaces and Global Variables](#add-namespaces-and-global-variables)
+- [Create the Start and Stop Service Methods](#create-the-start-and-stop-service-methods)
 - [Create the Main Method](#create-the-main-method)
 
-### Add Import Statements
+### Import C++ Libraries
 
-Add the C++ libraries for variable definitions and streaming.
+Import the C++ libraries for variable definitions and streaming.
 
 Library|Description
 ----|----
@@ -127,7 +268,7 @@ Library|Description
 #include <algorithm>
 ```
 
-Add the Agora SDK libraries.
+Import the Agora SDK libraries.
 
 Library|Description
 ----|----
@@ -164,7 +305,7 @@ using agora::linuxsdk::AudioFrame;
 
 ```
 
-Define global variables to determine signal and service starts and stops.
+Define global variables to determine service status.
 
 Variable|Description
 ---|---
@@ -179,7 +320,7 @@ atomic_bool_t g_bSignalStartService;
 atomic_bool_t g_bSignalStopService;
 ```
 
-### Start and Stop Service Methods
+### Create the Start and Stop Service Methods
 
 The `start_service()` and `stop_service()` methods update the global `g_bSignalStartService` and `g_bSignalStopService` variables.
 
@@ -216,7 +357,7 @@ int main(int argc, char * const argv[]) {
 
 #### Define Variables
 
-Define Agora variables for the Agora SDK engine.
+##### Define Agora variables for the Agora SDK engine.
 
 Variable|Description
 ----|----
@@ -233,6 +374,7 @@ Variable|Description
   string name;
   uint32_t channelProfile = 0;
 ```
+##### Define variables for recording configrations.
 
 Define the decryption mode `decryptionMode` and decryption key `secret`.
 
@@ -253,8 +395,7 @@ Define the paths for the application.
 
 Variable|Description
 ---|---
-`applitePath`|Application path
-`appliteLogPath`|Path to save application logs
+`applitePath`|Path to store AgoraCoreService
 `recordFileRootDir`|Directory to save the recording files
 `cfgFilePath`|Path to the configuration file
 `proxyServer`|IP and port for the proxy server
@@ -298,7 +439,7 @@ Define the video snapshot interval `captureInterval` (in seconds). Set the trigg
   int triggerMode = agora::linuxsdk::AUTOMATICALLY_MODE;
 ```
 
-Define the following recording configuration parameters: width, height, frames per second, and KB per second.
+Define the following video parameters: width, height, framerate, and bitrate.
 
 ``` c++
   int width = 0;
@@ -335,7 +476,14 @@ Event|Description
 
 #### Set Up the Parser Object
 
-Define the `parser` object, using the `parser.add_long_opt()` method to apply the app ID, user ID, channel name, application path, channel key, and channel profile. 
+Define the `parser` object, using the `parser.add_long_opt()` method to parse the following rtcEngine parameters:
+	
+- app ID
+- user ID
+- channel name
+- application path
+- channel key
+- channel profile
 
 ``` c++
   opt_parser parser;
@@ -351,7 +499,7 @@ Define the `parser` object, using the `parser.add_long_opt()` method to apply th
   parser.add_long_opt("channelProfile", &channelProfile, "channel_profile:(0:COMMUNICATION),(1:broadcast) default is 0/option");
 ```
 
-Set the audio, video, and mix settings.
+Parse the audio, video, and mix settings.
 
 ``` c++
   parser.add_long_opt("isAudioOnly", &isAudioOnly, "Default 0:A/V, 1:AudioOnly (0:1)/option");
@@ -361,35 +509,35 @@ Set the audio, video, and mix settings.
   parser.add_long_opt("mixedVideoAudio", &mixedVideoAudio, "mixVideoAudio:(0:seperated Audio,Video) (1:mixed Audio & Video), default is 0 /option");
 ```
 
-Set the decryption mode and decryption key `secret`.
+Parse the decryption mode and decryption key `secret`.
 
 ``` c++
   parser.add_long_opt("decryptionMode", &decryptionMode, "decryption Mode, default is NULL/option");
   parser.add_long_opt("secret", &secret, "input secret when enable decryptionMode/option");
 ```
 
-Apply the idle time limit and root directory for the recording files.
+Parse the idle time limit and root directory for the recording files.
 
 ``` c++
   parser.add_long_opt("idle", &idleLimitSec, "Default 300s, should be above 3s/option");
   parser.add_long_opt("recordFileRootDir", &recordFileRootDir, "recording file root dir/option");
 ```
 
-Set the low and high UDP ports.
+Parse the low and high UDP ports.
 
 ``` c++
   parser.add_long_opt("lowUdpPort", &lowUdpPort, "default is random value/option");
   parser.add_long_opt("highUdpPort", &highUdpPort, "default is random value/option");
 ```
 
-Apply the audio and video frame settings.
+Parse the audio and video frame settings.
 
 ``` c++
   parser.add_long_opt("getAudioFrame", &getAudioFrame, "default 0 (0:save as file, 1:aac frame, 2:pcm frame, 3:mixed pcm frame) (Can't combine with isMixingEnabled) /option");
   parser.add_long_opt("getVideoFrame", &getVideoFrame, "default 0 (0:save as file, 1:h.264, 2:yuv, 3:jpg buffer, 4:jpg file, 5:jpg file and video file) (Can't combine with isMixingEnabled) /option");
 ```
 
-Set the video snapshot interval, configuration file path, and proxy server.
+Parse the video snapshot interval, configuration file path, and proxy server.
 
 ``` c++
   parser.add_long_opt("captureInterval", &captureInterval, "default 5 (Video snapshot interval (second))");
@@ -397,7 +545,7 @@ Set the video snapshot interval, configuration file path, and proxy server.
   parser.add_long_opt("proxyServer", &proxyServer, "proxyServer:format ip:port, eg,\"127.0.0.1:1080\"/option");
 ```
 
-Set the video stream type and trigger mode.
+Parse the video stream type and trigger mode.
 
 ``` c++
   parser.add_long_opt("streamType", &streamType, "remote video stream type(0:STREAM_HIGH,1:STREAM_LOW), default is 0/option");
@@ -426,9 +574,7 @@ If the trigger mode is set to manual, add additional signal event listeners to s
   }
 ```
 
-Check if the recording file directory and configuration file path are empty:
-
-If the directories are not empty, log an error using the `LOG()` method and terminate the application.
+Check if the recording file directory and configuration file path are empty. If the directories are not empty, log an error using the `LOG()` method and terminate the application.
 
 
 ``` c++
@@ -438,7 +584,7 @@ If the directories are not empty, log an error using the `LOG()` method and term
   }
 ```
 
-If the directories are empty and mixing is enabled, set the mix resolution. If the resolution is set to a valid resolution, terminate the application.
+If the directories are empty and mixing is enabled, set the video parameters. If the parameters are invalid, terminate the application.
 
 ``` c++
   if(recordFileRootDir.empty() && cfgFilePath.empty())
@@ -454,9 +600,9 @@ If the directories are empty and mixing is enabled, set the mix resolution. If t
   }
 ```
 
-#### Set the Recording Configuration
+#### Apply the Recording Configuration
 
-Add a log to track the users that join the channel, and define the Agora SDK `recorder` and configuration.
+Add a log to track the users that join the channel.
 
 ``` c++
   LOG(INFO, "uid %" PRIu32 " from vendor %s is joining channel %s",
@@ -466,7 +612,14 @@ Add a log to track the users that join the channel, and define the Agora SDK `re
   agora::recording::RecordingConfig config;
 ```
 
-Set the idle time limit and channel profile.
+Define the Agora SDK `recorder` and configuration.
+
+``` c++
+  agora::AgoraSdk recorder;
+  agora::recording::RecordingConfig config;
+```
+
+Apply the idle time limit and channel profile.
 
 ``` c++
   config.idleLimitSec = idleLimitSec;
@@ -483,7 +636,7 @@ Apply the video, audio, and mix settings.
   config.mixedVideoAudio = mixedVideoAudio;
 ```
 
-Set the application directory, recording file directory, configuration file path, and proxy server.
+Apply the application directory, recording file directory, configuration file path, and proxy server.
 
 ``` c++
   config.appliteDir = const_cast<char*>(applitePath.c_str());
@@ -492,14 +645,14 @@ Set the application directory, recording file directory, configuration file path
   config.proxyServer = proxyServer.empty()? NULL:const_cast<char*>(proxyServer.c_str());
 ```
 
-Set the decryption mode and decryption key `secret`.
+Apply the decryption mode and decryption key `secret`.
 
 ``` c++
   config.secret = secret.empty()? NULL:const_cast<char*>(secret.c_str());
   config.decryptionMode = decryptionMode.empty()? NULL:const_cast<char*>(decryptionMode.c_str());
 ```
 
-Set the low and high UDP ports and the video capture interval.
+Apply the low and high UDP ports and the video capture interval.
 
 ``` c++
   config.lowUdpPort = lowUdpPort;
@@ -507,7 +660,7 @@ Set the low and high UDP ports and the video capture interval.
   config.captureInterval = captureInterval;
 ```
 
-Set the audio, video, and stream format types and the trigger mode.
+Apply the audio, video, and stream format types and the trigger mode.
 
 ``` c++
   config.decodeAudio = static_cast<agora::linuxsdk::AUDIO_FORMAT_TYPE>(getAudioFrame);
@@ -518,11 +671,15 @@ Set the audio, video, and stream format types and the trigger mode.
 
 #### Set Up the Agora Recorder
 
-Set the mix mode for the `recorder` and create an Agora video channel using the `recorder.createChannel()` method. If the channel creation fails, terminate the application.
+Set the mix mode for the `recorder`.
 
 ``` c++
   recorder.updateMixModeSetting(width, height, isMixingEnabled ? !isAudioOnly:false);
+```
 
+Create an Agora video channel. If it fails, terminate the application.
+
+``` c++
   if (!recorder.createChannel(appId, channelKey, name, uid, config)) {
     cerr << "Failed to create agora channel: " << name << endl;
     return -1;
